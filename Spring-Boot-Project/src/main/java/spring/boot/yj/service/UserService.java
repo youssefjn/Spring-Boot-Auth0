@@ -90,7 +90,7 @@ public class UserService {
 		return null;
 
 	}
-@Transactional
+	@Transactional
 	public boolean verifyUser(String token) {
 		Optional<VerificationToken>opToken = verificationTokenRepository.findByToken(token);
 		if (opToken.isPresent()){

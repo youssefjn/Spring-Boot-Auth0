@@ -13,8 +13,8 @@ public class UserNotVerifiedException extends Exception {
 
 	public UserNotVerifiedException(boolean newEmailSent) {
 		this.newEmailSent = newEmailSent;
-		
+
 	}
 
-	
+
 }

@@ -10,6 +10,6 @@ public class LoginResponse {
 	private String jwt;
 	private boolean success;
 	private String failureReason;
-	
-	
+
+
 }

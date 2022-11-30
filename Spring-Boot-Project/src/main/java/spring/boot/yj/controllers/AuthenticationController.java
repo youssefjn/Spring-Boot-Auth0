@@ -40,13 +40,13 @@ public class AuthenticationController {
 		} catch (UserAlreadyExistsException e) {
 			return new ResponseEntity<String>("User exists",HttpStatus.CONFLICT);
 		} catch (EmailFailureException e) {
-			 return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+			return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
 		}
 	}
-	
-	 @PostMapping("/login")
+
+	@PostMapping("/login")
 	public ResponseEntity<LoginResponse>loginUser(@Valid @RequestBody LoginBody loginBody){
-		 String jwt;
+		String jwt;
 		try {
 			jwt = userService.loginUser(loginBody);
 		} catch (UserNotVerifiedException e) {
@@ -57,33 +57,33 @@ public class AuthenticationController {
 				reason+="_EMAIL_RESENT";
 			}
 			loginResponse.setFailureReason(reason);
-			 return new ResponseEntity<>(loginResponse, HttpStatus.FORBIDDEN);
+			return new ResponseEntity<>(loginResponse, HttpStatus.FORBIDDEN);
 		} catch (EmailFailureException e) {
-			 return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+			return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
 		}
-		 if(jwt == null) {
-			 return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
-		 }else {
-			 LoginResponse loginResponse= new LoginResponse();
-			 loginResponse.setJwt(jwt);
-			 loginResponse.setSuccess(true);
-			 
-			 return new ResponseEntity<LoginResponse>(loginResponse,HttpStatus.OK);
-		 }
-	 }
-	 
-	 @GetMapping("/me")
+		if(jwt == null) {
+			return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+		}else {
+			LoginResponse loginResponse= new LoginResponse();
+			loginResponse.setJwt(jwt);
+			loginResponse.setSuccess(true);
+
+			return new ResponseEntity<LoginResponse>(loginResponse,HttpStatus.OK);
+		}
+	}
+
+	@GetMapping("/me")
 	public ResponseEntity<User> getLoggedInUserProfile(@AuthenticationPrincipal User user){
-		 return new ResponseEntity<User> (user,HttpStatus.OK);
-	 }
-	 
-	 @PostMapping("/verify")
-	 public ResponseEntity<?>verifyEmail(@RequestParam String token){
-		 if(userService.verifyUser(token)) {
-			 return new ResponseEntity<>(HttpStatus.OK);
-		 }else {
-			 return new ResponseEntity<>(HttpStatus.CONFLICT);
-		 }
-	 }
-	
+		return new ResponseEntity<User> (user,HttpStatus.OK);
+	}
+
+	@PostMapping("/verify")
+	public ResponseEntity<?>verifyEmail(@RequestParam String token){
+		if(userService.verifyUser(token)) {
+			return new ResponseEntity<>(HttpStatus.OK);
+		}else {
+			return new ResponseEntity<>(HttpStatus.CONFLICT);
+		}
+	}
+
 }

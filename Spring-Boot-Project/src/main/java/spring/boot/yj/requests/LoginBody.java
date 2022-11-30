@@ -9,8 +9,8 @@ import lombok.Getter;
 public class LoginBody {
 	@NotBlank
 	@NotNull
-private String username;
+	private String username;
 	@NotBlank
 	@NotNull
-private String password;
+	private String password;
 }
