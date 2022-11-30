@@ -10,10 +10,13 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import spring.boot.yj.entities.User;
+import spring.boot.yj.exceptions.EmailFailureException;
 import spring.boot.yj.exceptions.UserAlreadyExistsException;
+import spring.boot.yj.exceptions.UserNotVerifiedException;
 import spring.boot.yj.requests.LoginBody;
 import spring.boot.yj.requests.RegistrationBody;
 import spring.boot.yj.response.LoginResponse;
@@ -36,17 +39,35 @@ public class AuthenticationController {
 			return new ResponseEntity<RegistrationBody>(registrationBody,HttpStatus.CREATED);
 		} catch (UserAlreadyExistsException e) {
 			return new ResponseEntity<String>("User exists",HttpStatus.CONFLICT);
+		} catch (EmailFailureException e) {
+			 return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
 		}
 	}
 	
 	 @PostMapping("/login")
 	public ResponseEntity<LoginResponse>loginUser(@Valid @RequestBody LoginBody loginBody){
-		 String jwt = userService.loginUser(loginBody);
+		 String jwt;
+		try {
+			jwt = userService.loginUser(loginBody);
+		} catch (UserNotVerifiedException e) {
+			LoginResponse loginResponse = new LoginResponse();
+			loginResponse.setSuccess(false);
+			String reason ="USER_NOT_VERIFIED";
+			if ( e.isNewEmailSent()) {
+				reason+="_EMAIL_RESENT";
+			}
+			loginResponse.setFailureReason(reason);
+			 return new ResponseEntity<>(loginResponse, HttpStatus.FORBIDDEN);
+		} catch (EmailFailureException e) {
+			 return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+		}
 		 if(jwt == null) {
-			 return new ResponseEntity<>(null, HttpStatus.BAD_REQUEST);
+			 return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
 		 }else {
 			 LoginResponse loginResponse= new LoginResponse();
 			 loginResponse.setJwt(jwt);
+			 loginResponse.setSuccess(true);
+			 
 			 return new ResponseEntity<LoginResponse>(loginResponse,HttpStatus.OK);
 		 }
 	 }
@@ -54,6 +75,15 @@ public class AuthenticationController {
 	 @GetMapping("/me")
 	public ResponseEntity<User> getLoggedInUserProfile(@AuthenticationPrincipal User user){
 		 return new ResponseEntity<User> (user,HttpStatus.OK);
+	 }
+	 
+	 @PostMapping("/verify")
+	 public ResponseEntity<?>verifyEmail(@RequestParam String token){
+		 if(userService.verifyUser(token)) {
+			 return new ResponseEntity<>(HttpStatus.OK);
+		 }else {
+			 return new ResponseEntity<>(HttpStatus.CONFLICT);
+		 }
 	 }
 	
 }

@@ -23,7 +23,7 @@ public class JwtService {
 	private int expiryInSeconds;
 	private Algorithm algorithm;
 	private static final String USERNAME_KEY="USERNAME";
-	
+	private static final String Email_KEY="EMAIL";
 	@PostConstruct
 	public void postconstruct() {
 		algorithm= Algorithm.HMAC256(algorithmKey);
@@ -34,6 +34,11 @@ public class JwtService {
 				.withIssuer(Issuer).sign(algorithm);
 	}
 	
+	public String generateVerificationJWT(User user) {
+		return JWT.create().withClaim(Email_KEY, user.getEmail())
+				.withExpiresAt(new Date(System.currentTimeMillis()+(1000*expiryInSeconds)))
+				.withIssuer(Issuer).sign(algorithm);
+	}
 	
 	public String getUsername(String token) {
 		return JWT.decode(token).getClaim(USERNAME_KEY).asString();
