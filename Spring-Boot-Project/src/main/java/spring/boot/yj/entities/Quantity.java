@@ -9,6 +9,8 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -25,6 +27,7 @@ public class Quantity {
 	private Product product;
 	@Column(name = "quantity", nullable = false)
 	private Integer quantity;
+	@JsonIgnore
 	@ManyToOne(optional = false)
 	@JoinColumn(name = "purchaseOrder_id", nullable = false)
 	private PurchaseOrder purchaseOrder;

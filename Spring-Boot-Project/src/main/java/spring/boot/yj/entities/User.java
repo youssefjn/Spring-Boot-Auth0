@@ -11,9 +11,13 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.OneToMany;
+import javax.persistence.OrderBy;
 import javax.persistence.Table;
 import javax.validation.constraints.Email;
 import javax.validation.constraints.NotBlank;
+
+import org.hibernate.annotations.LazyCollection;
+import org.hibernate.annotations.LazyCollectionOption;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
@@ -49,7 +53,17 @@ public class User {
 	@NotBlank
 	@Column ( unique = true , nullable = false , length = 255)
 	private String email;
-	@JsonIgnore
-	@OneToMany(mappedBy = "user", cascade = CascadeType.REMOVE, orphanRemoval = true , fetch = FetchType.EAGER)
+	@JsonIgnore 
+	@LazyCollection(LazyCollectionOption.FALSE)
+
+	@OneToMany(mappedBy = "user", cascade = CascadeType.REMOVE, orphanRemoval = true )
 	private List<Address> addresses = new ArrayList<>();
+	@JsonIgnore
+	@LazyCollection(LazyCollectionOption.FALSE)
+
+	@OneToMany(mappedBy = "user",cascade = CascadeType.ALL,orphanRemoval = true )
+	@OrderBy("id desc")
+	private List<VerificationToken>verificationTokens=new ArrayList<>();
+	@Column(nullable = false )
+	private boolean emailVerified=false;
 }

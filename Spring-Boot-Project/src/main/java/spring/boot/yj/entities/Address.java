@@ -12,6 +12,11 @@ import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import javax.validation.constraints.NotBlank;
 
+import org.hibernate.annotations.LazyCollection;
+import org.hibernate.annotations.LazyCollectionOption;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -38,7 +43,8 @@ public class Address {
 	@NotBlank
 	@Column (length = 255,name = "address_line_2")
 	private String adLine2;
-	@ManyToOne(optional = false, fetch = FetchType.LAZY,cascade = CascadeType.ALL)
+	@JsonIgnore
+	@ManyToOne(optional = false )
 	@JoinColumn(name = "user_id", nullable = false)
 	private User user;
 }
