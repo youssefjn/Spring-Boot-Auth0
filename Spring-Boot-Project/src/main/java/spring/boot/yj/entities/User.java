@@ -5,6 +5,7 @@ import java.util.List;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
@@ -54,9 +55,7 @@ public class User {
 	@OneToMany(mappedBy = "user", cascade = CascadeType.REMOVE, orphanRemoval = true )
 	private List<Address> addresses = new ArrayList<>();
 	@JsonIgnore
-	@LazyCollection(LazyCollectionOption.FALSE)
-
-	@OneToMany(mappedBy = "user",cascade = CascadeType.ALL,orphanRemoval = true )
+	@OneToMany(mappedBy = "user",cascade = CascadeType.ALL,orphanRemoval = true ,fetch = FetchType.EAGER)
 	@OrderBy("id desc")
 	private List<VerificationToken>verificationTokens=new ArrayList<>();
 	@Column(nullable = false )
