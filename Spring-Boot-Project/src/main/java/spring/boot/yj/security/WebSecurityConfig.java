@@ -23,7 +23,8 @@ private JwtRequestFilter jwtRequestFilter;
 		http.csrf().disable().cors().disable();
 		http.addFilterBefore(jwtRequestFilter,AuthorizationFilter.class);
 		http.authorizeHttpRequests()
-		.antMatchers("/product","/auth/register","/auth/login", "/auth/verify").permitAll()
+		.antMatchers("/product","/auth/register",
+		"/auth/login", "/auth/verify", "auth/forgot", "auth/reset").permitAll()
 		.anyRequest().authenticated();
 		return http.build();
 	}

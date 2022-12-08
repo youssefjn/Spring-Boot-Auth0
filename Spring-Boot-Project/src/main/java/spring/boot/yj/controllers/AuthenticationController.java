@@ -15,9 +15,11 @@ import org.springframework.web.bind.annotation.RestController;
 
 import spring.boot.yj.entities.User;
 import spring.boot.yj.exceptions.EmailFailureException;
+import spring.boot.yj.exceptions.EmailNotFoundException;
 import spring.boot.yj.exceptions.UserAlreadyExistsException;
 import spring.boot.yj.exceptions.UserNotVerifiedException;
 import spring.boot.yj.requests.LoginBody;
+import spring.boot.yj.requests.PasswordResetBody;
 import spring.boot.yj.requests.RegistrationBody;
 import spring.boot.yj.response.LoginResponse;
 import spring.boot.yj.service.UserService;
@@ -86,4 +88,21 @@ public class AuthenticationController {
 		}
 	}
 
+	@PostMapping("/forgot")
+	public ResponseEntity<?> forgotPassword(@RequestParam String email ){
+		try {
+			userService.forgotPassword(email);
+			return new ResponseEntity<> (HttpStatus.OK);
+		} catch (EmailNotFoundException e) {
+		return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+		} catch (EmailFailureException e) {
+			return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+		}
+	}
+
+	@PostMapping("/reset")
+	public ResponseEntity<?> resetPassword (@Valid @RequestBody PasswordResetBody  passwordResetBody){
+		userService.resetPassword(passwordResetBody);
+		return new ResponseEntity<>(HttpStatus.OK);
+	}
 }

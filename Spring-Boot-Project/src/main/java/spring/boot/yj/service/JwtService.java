@@ -24,21 +24,36 @@ public class JwtService {
 	private int expiryInSeconds;
 	private Algorithm algorithm;
 	private static final String USERNAME_KEY="USERNAME";
-	private static final String Email_KEY="EMAIL";
+	private static final String VERIFICATION_EMAIL_KEY="VERIFICATION_EMAIL";
+	private static final String RESET_PASSWORD_KEY="RESET_PASSWORD_KEY";
 	@PostConstruct
 	public void postconstruct() {
 		algorithm= Algorithm.HMAC256(algorithmKey);
 	}
 	public String generateJWT(User user) {
-		return JWT.create().withClaim(USERNAME_KEY, user.getUsername())
+		return JWT.create()
+				.withClaim(USERNAME_KEY, user.getUsername())
 				.withExpiresAt(new Date(System.currentTimeMillis()+(1000*expiryInSeconds)))
 				.withIssuer(Issuer).sign(algorithm);
 	}
 
 	public String generateVerificationJWT(User user) {
-		return JWT.create().withClaim(Email_KEY, user.getEmail())
+		return JWT.create()
+				.withClaim(VERIFICATION_EMAIL_KEY, user.getEmail())
+				.withExpiresAt(new Date(System.currentTimeMillis()+(1000 * 60 * 30)))
+				.withIssuer(Issuer).sign(algorithm);
+	}
+
+	public String generatePasswordResetJWT(User user) {
+		return JWT.create()
+				.withClaim(RESET_PASSWORD_KEY, user.getEmail())
 				.withExpiresAt(new Date(System.currentTimeMillis()+(1000*expiryInSeconds)))
 				.withIssuer(Issuer).sign(algorithm);
+	}
+
+	public String getResetPasswordEmail ( String token){
+		DecodedJWT jwt = JWT.require(algorithm).build().verify(token);
+		return jwt.getClaim(RESET_PASSWORD_KEY).asString();
 	}
 
 	public String getUsername(String token) {

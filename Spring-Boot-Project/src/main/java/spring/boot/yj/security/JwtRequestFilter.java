@@ -45,11 +45,12 @@ public class JwtRequestFilter extends OncePerRequestFilter{
 				Optional<User>opUser = userRepository.findByUsernameIgnoreCase(username);
 				if(opUser.isPresent()) {
 					User user = opUser.get();
+					if ( user.isEmailVerified()){
 					UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(user, null , new ArrayList<>());
 					authenticationToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
 					SecurityContextHolder.getContext().setAuthentication(authenticationToken);
 
-
+					}
 				}
 			} catch (JWTDecodeException exception) {
 

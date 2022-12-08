@@ -6,6 +6,7 @@ import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Service;
 
+import spring.boot.yj.entities.User;
 import spring.boot.yj.entities.VerificationToken;
 import spring.boot.yj.exceptions.EmailFailureException;
 
@@ -40,7 +41,20 @@ public class EmailService {
 			throw new EmailFailureException();
 		}
 
+	}
 
+	public void sendPasswordResetEmail(User user, String token )throws EmailFailureException{
+ 
+		SimpleMailMessage message = makeMailMessage();
+		message.setTo(user.getEmail());
+		message.setSubject("your password reset request link");
+		message.setText("you requested a password reset on our website, Please" +
+		 "find the link below to be able to resset your password \n" + url + "/auth/reset?token="+token);
+		 try {
+			javaMailSender.send(message);		
+		 } catch (MailException e) {
+			throw new EmailFailureException();
+		 }
 	}
 
 }
