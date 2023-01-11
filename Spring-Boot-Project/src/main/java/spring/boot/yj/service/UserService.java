@@ -127,4 +127,8 @@ public class UserService {
 		}
 	}
 
+
+	public boolean userHasPermissionToUser(User user , Long id){
+	return user.getId()==id;	
+	}
 }
