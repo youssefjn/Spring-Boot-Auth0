@@ -106,7 +106,11 @@ public class WebSocketConfiguration implements WebSocketMessageBrokerConfigurer 
         public Message<?> preSend(Message<?> message, MessageChannel channel) {
             if (message.getHeaders().get("simpMessagetype").equals(SimpMessageType.SUBSCRIBE)) {
                 String destination = (String) message.getHeaders().get("simpDestination");
-                Map<String,String> params = MATCHER.extractUriTemplateVariables("/topic/user/{userId}/**", destination);
+                String userTopicMatcher = "/topic/user/{userId}/**";
+                if (MATCHER.match(userTopicMatcher, destination)) {
+                    
+               
+                Map<String,String> params = MATCHER.extractUriTemplateVariables(userTopicMatcher, destination);
                 try {
                     Long userId =Long.valueOf(params.get("userId"));
                     Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
@@ -123,11 +127,9 @@ public class WebSocketConfiguration implements WebSocketMessageBrokerConfigurer 
                     message = null;
                 }
                 
-            }
+            } 
+        }
             return message;
         }
-
-        
-
     }
 }

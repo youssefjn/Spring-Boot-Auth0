@@ -24,7 +24,7 @@ private JwtRequestFilter jwtRequestFilter;
 		http.addFilterBefore(jwtRequestFilter,AuthorizationFilter.class);
 		http.authorizeHttpRequests()
 		.antMatchers("/product","/auth/register",
-		"/auth/login", "/auth/verify", "auth/forgot", "auth/reset").permitAll()
+		"/auth/login", "/auth/verify", "auth/forgot", "auth/reset", "/websocket","/websocket/**").permitAll()
 		.anyRequest().authenticated();
 		return http.build();
 	}

@@ -6,6 +6,7 @@ import java.util.Optional;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -17,22 +18,28 @@ import org.springframework.web.bind.annotation.RestController;
 
 import spring.boot.yj.entities.Address;
 import spring.boot.yj.entities.User;
+import spring.boot.yj.model.DataChange;
 import spring.boot.yj.repositories.AddressRepository;
+import spring.boot.yj.service.UserService;
 
 @RestController
 @RequestMapping("/user")
 public class UserController {
 
     private AddressRepository addressRepository;
+    private SimpMessagingTemplate simpMessagingTemplate;
+    private UserService userService;
 
-    public UserController(AddressRepository addressRepository) {
+    public UserController(AddressRepository addressRepository,SimpMessagingTemplate simpMessagingTemplate,UserService userService) {
         this.addressRepository = addressRepository;
+        this.simpMessagingTemplate = simpMessagingTemplate;
+        this.userService = userService;
     }
 
     @GetMapping("/{userId}/address")
     public ResponseEntity<List<Address>> getAddress(@AuthenticationPrincipal User user, @PathVariable Long userId) {
         try {
-            if (!hasPermission(user, userId)) {
+            if (!userService.userHasPermissionToUser(user, userId)) {
                 return new ResponseEntity<>(HttpStatus.FORBIDDEN);
             }
             List<Address> addresses = new ArrayList<Address>();
@@ -50,14 +57,17 @@ public class UserController {
     public ResponseEntity<Address> updateAddress(
             @AuthenticationPrincipal User user, @PathVariable Long userId, @RequestBody Address address) {
         try {
-            if (!hasPermission(user, userId)) {
+            if (!userService.userHasPermissionToUser(user, userId)) {
                 return new ResponseEntity<>(HttpStatus.FORBIDDEN);
             }
             address.setId(null);
             User refUser = new User();
             refUser.setId(userId);
             address.setUser(refUser);
-            return new ResponseEntity<>(addressRepository.save(address), HttpStatus.OK);
+           Address savedAddress= addressRepository.save(address);
+           simpMessagingTemplate.convertAndSend("/topic/user/"+userId + "/address",
+           new DataChange<>(DataChange.ChangeType.INSERT,address));
+            return new ResponseEntity<>(savedAddress, HttpStatus.OK);
         } catch (Exception e) {
             return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
         }
@@ -69,7 +79,7 @@ public class UserController {
             @AuthenticationPrincipal User user, @PathVariable Long userId, @PathVariable Long addressId,
             @RequestBody Address address) {
         try {
-            if (!hasPermission(user, userId)) {
+            if (!userService.userHasPermissionToUser(user, userId)) {
                 return new ResponseEntity<>(HttpStatus.FORBIDDEN);
             }
             if (address.getId() == addressId) {
@@ -78,7 +88,10 @@ public class UserController {
                     User originalUser = opOriginalAddress.get().getUser();
                     if (originalUser.getId() == userId) {
                         address.setUser(originalUser);
-                        return new ResponseEntity<>(addressRepository.save(address), HttpStatus.OK);
+                        Address savedAddress= addressRepository.save(address);
+           simpMessagingTemplate.convertAndSend("/topic/user/"+userId + "/address",
+           new DataChange<>(DataChange.ChangeType.UPDATE,address));
+                        return new ResponseEntity<>(savedAddress, HttpStatus.OK);
                     }
                 }
             }
@@ -90,7 +103,4 @@ public class UserController {
 
     }
 
-    private boolean hasPermission(User user, long userId) {
-        return (user.getId() == userId);
-    }
 }

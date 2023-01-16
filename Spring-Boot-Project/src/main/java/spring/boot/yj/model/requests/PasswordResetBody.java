@@ -1,4 +1,4 @@
-package spring.boot.yj.requests;
+package spring.boot.yj.model.requests;
 
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
