@@ -18,10 +18,10 @@ import spring.boot.yj.exceptions.EmailFailureException;
 import spring.boot.yj.exceptions.EmailNotFoundException;
 import spring.boot.yj.exceptions.UserAlreadyExistsException;
 import spring.boot.yj.exceptions.UserNotVerifiedException;
-import spring.boot.yj.requests.LoginBody;
-import spring.boot.yj.requests.PasswordResetBody;
-import spring.boot.yj.requests.RegistrationBody;
-import spring.boot.yj.response.LoginResponse;
+import spring.boot.yj.model.requests.LoginBody;
+import spring.boot.yj.model.requests.PasswordResetBody;
+import spring.boot.yj.model.requests.RegistrationBody;
+import spring.boot.yj.model.response.LoginResponse;
 import spring.boot.yj.service.UserService;
 
 @RestController
